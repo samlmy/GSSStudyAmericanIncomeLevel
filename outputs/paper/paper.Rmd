@@ -1,0 +1,465 @@
+---
+title: "American’s Opinion Towards Income Level"
+subtitle: "General and Individual Group's Opinion Towards Income Difference Between the Rich and the Poor in America"
+author: 
+  - Mingyang Li
+  - Zecheng Wu
+thanks: "Code and data are available at: https://github.com/samlmy/GSSStudyAmericanIncomeLevel"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+abstract: "The attitude of the Americans toward income level is important for the government to understand whether most people are living in a comfortable situation. We obtained the data from the American General Social Survey (GSS) and analyzed different aspects according to the answers given by these participants. We discovered that the majority of non-visible minority, young people, or educated individual believe that the government ought to reduce the inequality between the rich and the poor. Non-visible minority or higher education people believe that the private companies and the government have more responsibility to reduce the difference of high and low pay employees. Non-white people also believe that the tax for the rich is a little too low. These findings can largely reflect on the political decisions which the government has made in each year. This matters to the next election if the general public is not satisfied with the current situation and wish to have a more fair and equitable treatment."
+output:
+  bookdown::pdf_document2
+toc: FALSE
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#importing packages for analysis and report writing
+library(tidyverse)
+library(ggpubr)
+library(ggplot2)
+library(here)
+library(haven)
+
+#load dataset
+reduced_data <- haven::read_dta(here::here("inputs/data/cleaned_data.dta"))
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#reordering the levels of variables' answers
+reduced_data$equal_wealth <- factor(reduced_data$equal_wealth, levels=c("Strongly Disagree", "Very Disagree", "Disagree", "Neutral", "Agree", "Very Agree", "Strongly Agree"))
+reduced_data$taxrich <- factor(reduced_data$taxrich, levels=c("Much Too Low", "Too Low", "About Right", "Too High", "Much Too High"))
+```
+
+# Introduction
+The General Social Survey has been collected by the National Opinion Research Center (NORC) at the university of Chicago since 1972. These records are essentials to the government, researchers, and organizations to see the opinions from these US residents. The president of the United State Joe Biden has promised to raise the corporate tax rate to 28% [@citePoliti]. However, the current tax rate is at 25% published by the CNBC news on May 6, 2021 [@citeCnbc]. Within the 17 promises that Biden has done, none of them is related to the equality of wealth. Does this mean the government of the U.S is already treating the vast majority in a fair way or the government has no clue about the voice in the general public. This will be answered in the result of our study.
+
+In this paper, we will be focusing on the attitude from these residents towards the income they received and how they think the rich and the poor are being treated in the year of 2021. We started with the data on the GSS website and downloaded the 2021 version. Then we imported the raw data into R studio to do further data cleaning and data analysis, using the statistical programming language R [@citeR]. The four independent variables that we have chosen are race, sex, age and education. These are the four factors that we want to know whether any of them will create biased opinions when answering questions. Our finding shows the majority believe that the government and the private companies are responsible to reduce the income gap. More specifically, people that are non-white, age around 50, and education above grade 12 have a stronger attitude towards income gap. Also, the non-white citizens think the tax for the rich is slightly too low. Since most of the complains come from the non-white people that live in America, it seems like the government and private companies have given more benefit to their own people and slightly unfair to the immigrants. 
+The implications from this survey isn’t very large since we have only considered a sample size of 4032 in addition to some of the questions where some people aren’t willing to answer. However, the objective of this paper is to allow us to have an understanding of the opinions from a small group where we can compare it with our own survey to form a well-considered dataset. Even though we can see a slight unfairness within the country, the result would be more considerate if we have a larger sample size for the non-white Americans. 
+The remainder of this paper is : Section \@ref(data) explains the data that we used from the GSS website. Section \@ref(results) explains what we found from the graphs that we have created. Section \@ref(discussion) explains interesting discovery and future improvement.
+
+
+# Data
+
+The data this report focuses on is the 2021 General Social Survey (GSS) from National Opinion Research Center (NORC) at the University of Chicago. The data collection period of the 2021 GSS is from December 2020 to May 2021, and released on the organization's GSS website. In order to adapt to the COVID-19 situation, the survey shifted from in-person to online and sampled respondents through their address [@citeMethod]. NORC is aware that the new methodology would possibly contribute to the change of opinion in 2021. They indicate that instead of randomly selecting a representation in each invited household, they let whoever has the most recent birthday to fill out the survey[@citeMethod]. Also, no in person guidelines were provided, respondents need to administrate themselves through the survey. In comparison to previous years’ results, they found the overall response rate dropped, more incomplete responses and lack of diversity in demographic [@citeMethod]. Furthermore, the GSS always allows "I don't know" as an answer when it is in person. The choice remains in factual questions, but it is not given in opinion questions [@citeMethod]. Note that if the participant still does not want to answer those questions, they can opt to skip the question on the website [@citeMethod]. Additionally, the 2021 GSS introduced a “SEXNOW1” variable for participants to describe their current gender; this will be the only gender variable that we will consider in replace of the sex at birth. As the above has mentioned, in the following part of this section, we will examine the distribution of respondents' demographic, and discuss how we will approach the missing entries.
+
+The report accessed the dataset by downloading the 2021 stata data file from the NORC GSS website [@citeData]. Then, `haven` allows us to load the dataset that we obtained from the portal [@citehaven]. The original dataset consists of 2805 variables and 4032 observations. Using `tidyverse` [@citeTidyverse], we reduced the dataset to seven variables of interest that help us to explore the opinions in American income level: gender, age, race, education, equal wealth, responsibility and tax on the rich. The attributes of demographic are collected through factual questions, and the latter three variables describe the answers from opinion questions. 
+
+Using `ggplot2` [@citeggplot], we are able to visualize the demographic distribution of the respondents. NORC mentions that this year's survey is short on people who are under 30. Figure \@ref(fig:1) illustrates the density of age, and we see evidence that the density of the age group below 50 is lower than the density of elderly respondents. In figure \@ref(fig:2), we see most respondents have completed 12th grade and 4 years of college. According to NORC, they had less people without high school diplomas, which is evident as the graph is heavily right skewed. Figure \@ref(fig:3) shows that the number respondents who chose not to reveal their gender is more than the sum of transgender and none of these. Although we mentioned earlier that NORC seeks to improve the survey by adding the new gender variable, the amount of no answers is still causing the under representation of gender minority people because null answers may contain respondents who want specific description of their identity. Subsequently, NORC indicates that they lost many African American respondents this year. Yet, figure \@ref(fig:4) suggests that not only were the number of black respondents low, the number of other visible minorities is incomparable to white people in the 2021 GSS. Overall, it is very important to investigate the demographic distribution in a report like this, because they are explanatory variables that could have an influence towards the research direction. In our case, if a certain population has a different opinion towards the income level in the United States, their opinion cannot be seen because the final result would be biased. In order to address the imbalance in the 2021 GSS, we will analyze the white population separately and other races as a whole, and combine the graph into one figure using `ggpubr` [@citeggpubr].
+
+In addition to how the original survey might have impacted the data, the online version of the GSS allows the respondents to be more comfortable to share their most honest opinion. This is because the original design of the GSS is an interview, which might pressure the participants to be conservative about their opinions. Also, the privacy of the respondents are more protected in an online survey as they do not need to reveal themselves in front of NORC. However, the downside could be that the participants is allowed to skip any question for no reason. As a result, a lot of response was lost, causing a smaller sample size for certain questions. This is evident in our analysis as some variables end up losing half of the observations after filtering out the not applicable answers. Another issue with the GSS is extremely long survey with 2805 questions. Even if people choose to not skip some questions, it is very likely for them to choose random answers, which would be detrimental to the accuracy of our result.
+
+Moreover, we want to mention that we nominated 20 different variables concerning income opinions in America. We filtered out all the questions that do not have the best description of our objective. For example, one of the question asks about how many families the respondent is currently supporting. Our first impression is that this could be related to the income gap concern in a sense that people who support multiple families might have a heavier burden in income; causing them to think they want more balance between the rich and the poor. However, we decide to not include it in the end since to include this would require a whole independent research in the average cost of to raise an family. This can vary depending on the average earning and location, which is not the main focus of our report.
+
+
+```{r 1, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Density Plot of the GSS Respondents' Age"}
+#Drawing a density plot of age
+ggplot(reduced_data, aes(x=age)) +
+  geom_line(aes(y = ..density..), stat = 'density')+      
+  geom_histogram(aes(y = ..density..), alpha = 0.4) +                        
+  scale_colour_manual()+
+  labs(x = "Age", title = "Age Distribution")+
+  theme_minimal()
+```
+
+```{r 2, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart of the GSS Respondents' Education Level"}
+#Drawing bar chart of number of respondents in each education level
+ggplot(reduced_data, aes(x =education)) +
+  geom_bar()+
+  labs(x="Education in Years", y = "Number of Respondents", title = "Education Distribution")+
+  theme_minimal()
+```
+
+```{r 3, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart of the GSS Respondents' Gender"}
+#Drawing bar chart of number of respondents in each gender
+ggplot(reduced_data, aes(x =gender)) +
+  geom_bar() +
+  coord_flip() +
+  labs(x="Genders", y = "Number of Respondents", title = "Gender Distribution")+
+  theme_minimal()
+```
+
+```{r 4, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Barchart of the GSS Respondents' Race"}
+#Drawing bar chart of number of respondents in each race
+ggplot(reduced_data, aes(x =race)) +
+  geom_bar()+
+  coord_flip()+
+  labs(x="Races", y = "Number of Respondents", title = "Race Distribution")+
+  theme_minimal()
+
+```
+
+
+
+\newpage
+
+# Results
+
+Figure \@ref(fig:5) reveals that more than half of the respondents believe that the federal government should reduce the income gap between the rich and the poor, and one third have a very strong opinion that the government should be involved. On the age spectrum, figure \@ref(fig:6) demonstrates that as the age rises, respondents tend to disagree with the opinion. In terms of race shown in figure \@ref(fig:7), most respondents still think the issue comes from the government, but ethnicities beside white people show a much higher tendency to agree with this opinion. If we consider Figure \@ref(fig:8), we can see there is a slightly higher proportion of females who think the government needs to reduce the income gap compared to male. However, it is not enough to say that there is a bias for women since we have a higher percentage of women in our sample. Finally, we want to consider the education level which we can see in Figure \@ref(fig:9). We can clearly see all the options have peaks on the blue and purple which indicates most of the participants have education in 12th grade and 4th years college. Specifically, we can see the option for ‘Strongly Agree’ is much higher compared to the other. Thus, it shows that higher educated people wish the government to reduce the income gap.
+
+In figure \@ref(fig:10), the chart shows that government and private companies have major responsibility for reducing the income difference between the rich and the poor.  Speaking of age, figure \@ref(fig:11) younger people find the responsibility belongs to the government, and older people tend to think private firms need to work on the issue. Figure \@ref(fig:12) suggests that white population finds that government and private companies have an equal share of the problem, and some white respondents believe the difference does not need to be reduced. On the other hand, almost half of the respondents coming from a racial minority think that the government should be responsible, and only a quarter think that firms have the responsibility. "No need to be reduced" is the least popular opinion for other races. In Figure \@ref(fig:13), the options from males and females are distributed evenly which there isn’t any bias in gender. On the other hand, we can see in Figure \@ref(fig:14) where people between 12th grade and 4th year college degree think the private companies and the government have the most responsibility to reduce the income gap.
+
+For the question that asks for opinion about the taxes in the United States with high income, figure \@ref(fig:15) illustrates that more than half of respondents with answers think it is either too low or much too low. A quarter of respondents think the tax for rich people is fair, and less than a quarter feels that the current tax is too high. Figure \@ref(fig:16) shows that a relatively younger age group tends to believe the tax is much too high for the high income population. Furthermore, figure \@ref(fig:17) mostly resonate with figure \@ref(fig:18). The only difference are a slightly higher proportion of non-white respondents think that tax for high income earners is about right, and a little less seen in the much too low option, compared with the proportion of opinion from white respondents. It is interesting to see that the gender has no bias again in Figure \@ref(fig:19) where most of them do think that the tax for the rich is a little too low. Within these votes, we can see the majority who selected the option ‘too low’ have a higher education in Figure \@ref(fig:19).
+
+Overall, we conclude that most people have a believe that the federal government should be pick up the responsibility of reducing the income gap between the wealthy and the working class. There is a racial difference in this opinion that the non-white population feels that the government should be more responsible in solving the issue. Similarly, many white respondents also thinks that private companies have a major responsibility. An interesting question is why people came from a racial minority tend believe that the government needs to fix the income gap, but less percentage of them think that income tax for the rich is too low compared to white participants' responses. After closely examining the results we discovered many more fascinating questions that will be discussed the following section.
+
+```{r , echo=FALSE, warning=FALSE, message=FALSE}
+#preparing the education variable for plotting
+reduced_data <-
+  reduced_data %>%
+  mutate(education = case_when(
+    education == 0 ~ "No Formal Schooling", 
+    education == 1 ~ "1st Grade", 
+    education == 2 ~ "2nd Grade", 
+    education == 3 ~ "3rd Grade", 
+    education == 4 ~ "4th Grade",
+    education == 5 ~ "5th Grade", 
+    education == 6 ~ "6th Grade", 
+    education == 7 ~ "7th Grade", 
+    education == 8 ~ "8th Grade", 
+    education == 9 ~ "9th Grade", 
+    education == 10 ~ "10th Grade", 
+    education == 11 ~ "11th Grade", 
+    education == 12 ~ "12th Grade", 
+    education == 13 ~ "1st Year College", 
+    education == 14 ~ "2nd Years College", 
+    education == 15 ~ "3rd Years College", 
+    education == 16 ~ "4th Years College", 
+    education == 17 ~ "5th Years College", 
+    education == 18 ~ "6th Years College", 
+    education == 19 ~ "7th Years College", 
+    education == 20 ~ "8th Years College" ))
+
+reduced_data$education <- factor(reduced_data$education, levels = c("No Formal Schooling", "1st Grade",
+                              "2nd Grade", "3rd Grade", "4th Grade", "5th Grade", "6th Grade","7th Grade",
+                              "8th Grade","9th Grade","10th Grade","11th Grade","12th Grade", "1st Year College", 
+                              "2nd Years College", "3rd Years College", "4th Years College","5th Years College",
+                              "6th Years College","7th Years College","8th Years College"))
+                              
+```
+
+```{r 5, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Pie Chart for Overall Distribution of Responses to Whether Government Should be Responsible for the Income Difference Between the Poor and the Rich that Excludes Not Applicable Answers"}
+#Drawing pie chart of the equal wealth variable without not applicable answers
+reduced_data %>%
+  filter(!is.na(equal_wealth)) %>%
+  filter(equal_wealth != '') %>%
+  ggplot(aes(x=factor(1), fill=factor(equal_wealth)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category", title = "Government Ought to Ruduce the Income Gap")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Blues") + theme_void() +
+  theme(axis.text.x=element_blank())
+```
+
+```{r 6, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Boxplots for Different Ages' Responses to Whether the Government Should be Responsible for Income Difference Between the Poor and the Rich Excluding Not Applicable Answers"}
+#Drawing boxplots of the equal wealth variable with respect to ages without not applicable entries
+reduced_data %>%
+  filter(!is.na(equal_wealth)) %>%
+  filter(equal_wealth != '') %>%
+  filter(!is.na(age)) %>%
+  group_by(equal_wealth) %>%
+  ggplot(aes(equal_wealth, age)) +
+    geom_boxplot() +
+    labs(title = "Government Ought to Ruduce the Income Gap for Different Age", x="Category",
+         y="Age")+
+    theme_minimal()+
+    coord_flip()
+
+```
+
+```{r 7, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Pie Charts for Different Races' Responses to Whether the Government Should be Responsible for Income Difference Between the Poor and the Rich Excluding Not Applicable Answers"}
+#Drawing pie charts of the equal wealth variable with respect to race without not applicable entries
+eq1<-reduced_data %>%
+  filter(!is.na(equal_wealth)) %>%
+  filter(equal_wealth != '')%>%
+  filter(!is.na(race)) %>%
+  filter(race != '') %>%
+  filter(race == 'White') %>%
+  ggplot(aes(x=factor(1), fill=factor(equal_wealth)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Blues") + theme_void() +
+  theme(axis.text.x=element_blank())+
+  labs(title = "White")
+
+eq2<-reduced_data %>%
+  filter(!is.na(equal_wealth)) %>%
+  filter(equal_wealth != '')%>%
+  filter(!is.na(race)) %>%
+  filter(race != '') %>%
+  filter(race != 'White') %>%
+  ggplot(aes(x=factor(1), fill=factor(equal_wealth)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Blues") + theme_void() +
+  theme(axis.text.x=element_blank())+
+  labs(title = "Other Races")
+#Combining the plots into one figure
+ggarrange(eq1, eq2, ncol=2, common.legend = TRUE, legend="right")
+
+
+```
+
+```{r 8, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart for Different Genders' Responses to Whether the Government Should be Responsible for Income Difference Between the Poor and the Rich Excluding Not Applicable Answers"}
+# gender / equal wealth 
+reduced_data %>%
+  filter(!is.na(equal_wealth)) %>%
+  filter(equal_wealth != '') %>%
+  filter(!is.na(gender)) %>%
+  filter(gender != '') %>%
+  ggplot(aes(x = equal_wealth, fill = gender)) +
+  geom_bar() + 
+  coord_flip() +
+  ggtitle("Government Ought to Ruduce the Income Gap") + 
+  ylab("number of votes") + 
+  xlab("") +
+  theme_minimal()
+```
+
+```{r 9, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart for Respondents with Different Education Level's Responses to Whether the Government Should be Responsible for Income Difference Between the Poor and the Rich Excluding Not Applicable Answers"}
+# education / equal wealth
+reduced_data %>%
+  filter(!is.na(equal_wealth)) %>%
+  filter(equal_wealth != '') %>%
+  filter(!is.na(education)) %>%
+  filter(education != '') %>%
+  ggplot(aes(x = equal_wealth, fill = education)) +
+  geom_bar(position = position_dodge()) + 
+  coord_flip() +
+  labs(title = "Government Ought to Ruduce the Income Gap", x = "", y="number of votes")+ 
+  theme_minimal()
+  
+```
+
+
+```{r 10, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Pie Chart for Overall Distribution of Responses to 'who should have the greatest responsibility for reducing differences in income between people with high incomes and people with low incomes' Excluding Not Applicable Answers"}
+#Drawing pie chart of the responsibility variable without not applicable answers
+reduced_data %>%
+  filter(!is.na(responsibility)) %>%
+  ggplot(aes(x=factor(1), fill=factor(responsibility)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category", title="Greatest Responsibility for Reducing the Income Difference")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Dark2") + theme_void() +
+  theme(axis.text.x=element_blank())
+```
+
+```{r 11, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Boxplots for Different Ages' Responses to 'who should have the greatest responsibility for reducing differences in income between people with high incomes and people with low incomes' Excluding Not Applicable Answers"}
+#Drawing boxplots of the responsibility variable with respect to ages without not applicable entries
+reduced_data %>%
+  filter(!is.na(responsibility)) %>%
+  group_by(responsibility) %>%
+  ggplot(aes(responsibility, age)) +
+    geom_boxplot() +
+    labs(title = "Government Ought to Ruduce the Income Gap", x="Category", 
+         y="Age")+
+    theme_minimal()+
+    coord_flip()
+```
+
+```{r 12, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Pie Charts for Different Races' Responses to 'who should have the greatest responsibility for reducing differences in income between people with high incomes and people with low incomes' Excluding Not Applicable Answers"}
+#Drawing pie charts of the responsibility variable with respect to race without not applicable entries
+re1<-reduced_data %>%
+  filter(!is.na(responsibility)) %>%
+  filter(responsibility != '') %>%
+  filter(!is.na(race)) %>%
+  filter(race == 'White') %>%
+  ggplot(aes(x=factor(1), fill=factor(responsibility)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Dark2") + theme_void() +
+  theme(axis.text.x=element_blank())+
+  labs(title = "White")
+
+re2<-reduced_data %>%
+  filter(!is.na(responsibility)) %>%
+  filter(responsibility != '') %>%
+  filter(!is.na(race)) %>%
+  filter(race != 'White') %>%
+  ggplot(aes(x=factor(1), fill=factor(responsibility)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Dark2") + theme_void() +
+  theme(axis.text.x=element_blank())+
+  labs(title = "Other races")
+#Combining the plots into one figure
+ggarrange(re1, re2, ncol=2, common.legend = TRUE, legend="right")
+```
+
+```{r 13, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart for Different Genders' Responses to 'who should have the greatest responsibility for reducing differences in income between people with high incomes and people with low incomes' Excluding Not Applicable Answers"}
+# gender / responsibility
+reduced_data %>%
+  filter(!is.na(responsibility)) %>%
+  filter(responsibility != '') %>%
+  filter(!is.na(gender)) %>%
+  filter(gender != '') %>%
+  ggplot(aes(x = responsibility, fill = gender)) +
+  geom_bar() + 
+  coord_flip() +
+  ggtitle("Responsible to Reduce the Income Gap")+ 
+  ylab("number of votes") + 
+  xlab("")+
+  theme_minimal()
+
+```
+
+```{r 14, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart for Respondents with Different Education Level's Responses to 'who should have the greatest responsibility for reducing differences in income between people with high incomes and people with low incomes' Excluding Not Applicable Answers"}
+# education / responsibility
+reduced_data %>%
+  filter(!is.na(responsibility)) %>%
+  filter(responsibility != '') %>%
+  filter(!is.na(education)) %>%
+  filter(education != '') %>%
+  ggplot(aes(x = responsibility, fill = education)) +
+  geom_bar(position = position_dodge()) + 
+  coord_flip() +
+  ggtitle("Responsible to Reduce the Income Gap")+ 
+  ylab("number of votes") + 
+  xlab("")+
+  theme_minimal()
+```
+
+```{r 15, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Pie Chart for Overall Distribution of Responses to 'how you would describe taxes in America today for those with high incomes' Excluding Not Applicable Answers"}
+#Drawing pie chart of the taxrich variable without not applicable answers
+reduced_data %>%
+  filter(!is.na(taxrich)) %>%
+  ggplot(aes(x=factor(1), fill=factor(taxrich)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Blues") + theme_void() +
+  theme(axis.text.x=element_blank())
+
+```
+
+```{r 16, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Boxplots for Different Ages' Responses to 'how you would describe taxes in America today for those with high incomes' Excluding Not Applicable Answers"}
+#Drawing boxplots of the taxrich variable with respect to ages without not applicable entries
+reduced_data %>%
+  filter(!is.na(taxrich)) %>%
+  group_by(taxrich) %>%
+  ggplot(aes(taxrich, age)) +
+    geom_boxplot() +
+    labs(title = "Government Ought to Ruduce the Income Gap", x="Category", 
+         y="Age")+
+    theme_minimal()+
+    coord_flip()
+
+```
+
+```{r 17, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Pie Charts for Different Races' Responses to 'how you would describe taxes in America today for those with high incomes' Excluding Not Applicable Answers"}
+#Drawing pie charts of the taxrich variable with respect to race without not applicable entries
+ta1<-reduced_data %>%
+  filter(!is.na(taxrich)) %>%
+  filter(!is.na(race)) %>%
+  filter(race == 'White') %>%
+  ggplot(aes(x=factor(1), fill=factor(taxrich)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Blues") + theme_void() +
+  theme(axis.text.x=element_blank())+
+  labs(title = "White")
+
+ta2<-reduced_data %>%
+  filter(!is.na(taxrich)) %>%
+  filter(!is.na(race)) %>%
+  filter(race != 'White') %>%
+  ggplot(aes(x=factor(1), fill=factor(taxrich)))+
+  geom_bar(stat = "count") +
+  labs(fill="Category")+
+  coord_polar("y") +
+  scale_fill_brewer(palette="Blues") + theme_void() +
+  theme(axis.text.x=element_blank())+
+  labs(title = "Other races")
+#Combining the plots into one figure
+ggarrange(ta1, ta2, ncol=2, common.legend = TRUE, legend="right")
+```
+
+```{r 18, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart for Different Genders' Responses to 'how you would describe taxes in America today for those with high incomes' Excluding Not Applicable Answers"}
+# gender / taxrich
+reduced_data %>%
+  filter(!is.na(taxrich)) %>%
+  filter(taxrich != '') %>%
+  filter(!is.na(gender)) %>%
+  filter(gender != '') %>%
+  ggplot(aes(x = taxrich, fill = gender)) +
+  geom_bar() + 
+  coord_flip() +
+  ggtitle("Taxes for People with High Income")+ 
+  ylab("number of votes") + 
+  xlab("")+
+  theme_minimal()
+```
+
+```{r 19, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Bar Chart for Respondents with Different Education Level's Responses to 'how you would describe taxes in America today for those with high incomes' Excluding Not Applicable Answers"}
+# education / taxrich
+reduced_data %>%
+  filter(!is.na(taxrich)) %>%
+  filter(taxrich != '') %>%
+  filter(!is.na(education)) %>%
+  filter(education != '') %>%
+  ggplot(aes(x = taxrich, fill = education)) +
+  geom_bar(position = position_dodge()) + 
+  coord_flip() +
+  ggtitle("Taxes for People with High Income")+ 
+  ylab("number of votes") + 
+  xlab("") +
+  theme_minimal()
+```
+
+\newpage
+
+# Discussion
+## Government Responsibility vs. Tax for the Rich
+Tax is controlled by the government, and for them to be involved in reducing the income difference between high salary individuals and low salary workers, tax is one of their approach that the government could take. However, from the results listed in the previous section, there is an very interesting conflict. In all of the questions, we find some differences between the dominant race and the minority, but they contrast in two ways. One being the non-white participants favors the government to take on the role in fixing the gap. The other is their opinion on whether rich people should pay more taxes in not as strong as white respondents'. There are two implications can be obtained from this contrasting result. Firstly, the working class racial minorities mostly want the support from the government rather than punishing the rich. Secondly, the racial minorities that are wealthy want the government to offer help to the low income population, but at the same time, they do not want to pay more taxes than they already do. 
+
+
+## Data Accuracy
+
+Majority of the survey questions that are being asked have approximately 40%-60% of the people who do not answer the question in an applicable way. This means even though we have a sample size of 4032, we can only get half the amount of the data. In addition, people who have answered the question can be different each time. This means that there could be no correlation between each question and all the assumption for the interesting points above could be wrong. 
+
+## Racial Politics
+
+From the results, we observed that people with different races have different opinions when doing the survey questions. In the past decades, we have seen many news about racism happening in the U.S where the visible minorities aren’t being treated fairly. An infamous one was the George Floyd case where this 46-year-old African American was killed after coming out from a convenience store []. Asian people were being discriminated against during the pandemic[]. The United States has rejected Iraq refugees in 2008 []. They are all discriminatory events that are directly related the U.S government. Thus, it is reasonable to see the majority of non-white people think that the government should bear the most responsibility for any inequalities such as income gap. 
+
+## Weakness
+
+One of the major issues is the distribution between different groups of people. As we can see from our data, most of the people are white and highly educated. This means most of the results would become more biased toward the opinion from this group. Another weakness is that the questions that we have considered are too few. If we can consider more aspects and more survey questions from the groups that we have divided into, we would expect to see more attitudes from these people towards the political decisions made by the government.
+
+## Potential next step
+
+We have created a supplementary survey for our own use where all the questions are mandatory to complete before submission. This can avoid people who skip questions that can potentially make the results irrelevant to each other. In addition, we will no longer have the issue with uneven amounts of data collected from different questions. The only downside is when people are impatient with the questions, they might just click a random option for each of the questions that make our result inaccurate. Therefore, we decided to make a much shorter survey where most people would feel comfortable doing so.
+
+
+\newpage
+
+\appendix
+
+# Appendix {-}
+##Survery
+Click the link or scan the QR code to check and complete the follow up survey: https://forms.gle/VGUm2T1oYFoLwidS6
+
+![QR Code for the Follow Up Survey](/cloud/project/inputs/images/QRCode.png)
+The attached images below shows the screenshot of our survey.
+
+![Survery Introduction and question 1 to 2](/cloud/project/inputs/images/1.png)
+![Survery Question 3 to 5](/cloud/project/inputs/images/2.png)
+
+
+![Survery Question 6 to 8](/cloud/project/inputs/images/3.png)
+![Survery Question 9 to 11](/cloud/project/inputs/images/3.png)
+![Survery Question 12 to 15 14](/cloud/project/inputs/images/4.png)
+![Survery Question 16 to 18](/cloud/project/inputs/images/5.png)
+![Survery Thanks Page](/cloud/project/inputs/images/thanks.png)
+
+\newpage
+
+
+# References
+
+
